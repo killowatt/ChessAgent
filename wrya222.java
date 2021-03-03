@@ -42,23 +42,20 @@ public class wrya222 extends Agent
     @Override
     protected State chooseMove(State current) 
     {
-        epic p = minmax(1, current, Integer.MIN_VALUE, Integer.MAX_VALUE);
-        State s = p.state;
+        State bestState = null;
+        int bestValue = Integer.MIN_VALUE;
 
-        if (s == null) {
-            System.out.println("Null state");
-            return null;
-        }
-
-        for (State ss : current.next())
+        for (State state : current.next())
         {
-            System.out.println("<" + ss.toString() + " ?= " + s.toString() + ">");
-            if (ss.toString().equals(s.toString()))
-                return ss;
+            int value = current.player == Player.WHITE ? getBoardValue(state.board) : -getBoardValue(state.board);
+            if (value > bestValue)
+            {
+                bestValue = value;
+                bestState = state;
+            }
         }
 
-        System.out.println("BUG, no matching states.");
-        return null; // lol
+        return bestState;
     }
 
     private static epic minmax(int depth, State state, int alpha, int beta)
@@ -73,7 +70,7 @@ public class wrya222 extends Agent
             return new epic(0, state);
 
         if (depth == 0)
-            return new epic(getBoardValue(state.board, state.player), state);
+            return new epic(getBoardValue(state.board), state);
 
         if (state.player == Player.WHITE)
         {
@@ -82,9 +79,9 @@ public class wrya222 extends Agent
             for (State next : state.next())
             {
                 value = epic.max(value, minmax(depth - 1, next, alpha, beta));
-                alpha = Math.max(alpha, value.value);
-                if (alpha >= beta)
-                    break;
+                //alpha = Math.max(alpha, value.value);
+                //if (alpha >= beta)
+                //    break;
             }
             return value;
         }
@@ -94,21 +91,21 @@ public class wrya222 extends Agent
             for (State next : state.next())
             {
                 value = epic.min(value, minmax(depth - 1, next, alpha, beta));
-                beta = Math.min(beta, value.value);
-                if (beta <= alpha)
-                    break;
+                //beta = Math.min(beta, value.value);
+                //if (beta <= alpha)
+                //    break;
             }
             return value;
         }
     }
 
-    private static int getBoardValue(Board board, Player player)
+    private static int getBoardValue(Board board)
     {
         int score = 0;
         for (Piece piece : board)
         {
             int value = getPieceValue(piece);
-            score += piece.player == player ? value : -value;
+            score += piece.player == Player.WHITE ? value : -value;
         }
         return score;
     }
@@ -126,8 +123,8 @@ public class wrya222 extends Agent
         else if (piece instanceof Queen)
             return 9;
         else if (piece instanceof King)
-            return 100;
+            return 90;
         else
-            return 0;
+            return 0; // Unknown piece
     }
 }

@@ -58,17 +58,31 @@ public class wrya222 extends Agent
             }
         }
 
+        if (bestState == null)
+        {
+            System.out.println("something went wrong " + bestValue);
+            return current.next().iterator().next();
+        }
+
         return bestState;
     }
 
     static Player ourplayer;
     private static int minMax(int depth, State state, int alpha, int beta)
     {
-        if (state.check && !state.next().iterator().hasNext())
-            return state.player != ourplayer ? 10000000 : -10000000;
+        //if (state.check && !state.next().iterator().hasNext())
+        //    return state.player != ourplayer ? 10000 : -100000;
 
-        if (state.check)
-            return state.player != ourplayer ? 10000 : -10000;
+        //if (state.check)
+        //    return state.player != ourplayer ? 1000 : -10000;
+
+        if (state.movesUntilDraw == 0)
+            return 0;
+
+        //if (!state.next().iterator().hasNext())
+        //{
+        //    System.out.println("what? ");
+        //}
 
         if (depth == 0)
             return getStateValue(state);

@@ -1,34 +1,6 @@
 import edu.uky.ai.chess.Agent;
 import edu.uky.ai.chess.state.*;
 
-class epic
-{
-    int value;
-    State state;
-
-    public epic(int value, State state)
-    {
-        this.value = value;
-        this.state = state;
-    }
-
-    static epic max(epic left, epic right)
-    {
-        if (left.value >= right.value)
-            return left;
-        else
-            return right;
-    }
-
-    static epic min(epic left, epic right)
-    {
-        if (left.value <= right.value)
-            return left;
-        else
-            return right;
-    }
-}
-
 /**
  * @author William Yates
  */
@@ -44,7 +16,7 @@ public class wrya222 extends Agent
     {
         ourplayer = current.player;
 
-        State bestState = null;
+        State bestState = current.next().iterator().next();
         int bestValue = Integer.MIN_VALUE;
 
         final int depth = 2;
@@ -56,12 +28,6 @@ public class wrya222 extends Agent
                 bestState = state;
                 bestValue = value;
             }
-        }
-
-        if (bestState == null)
-        {
-            System.out.println("something went wrong " + bestValue);
-            return current.next().iterator().next();
         }
 
         return bestState;
@@ -76,13 +42,8 @@ public class wrya222 extends Agent
         //if (state.check)
         //    return state.player != ourplayer ? 1000 : -10000;
 
-        if (state.movesUntilDraw == 0)
+        if (state.movesUntilDraw == 0 || (state.over && !state.check))
             return 0;
-
-        //if (!state.next().iterator().hasNext())
-        //{
-        //    System.out.println("what? ");
-        //}
 
         if (depth == 0)
             return getStateValue(state);
@@ -94,7 +55,7 @@ public class wrya222 extends Agent
             {
                 value = Math.max(value, minMax(depth - 1, next, alpha, beta));
                 alpha = Math.max(alpha, value);
-                if (beta <= alpha)
+                if (alpha >= beta)
                     break;
             }
             return value;
@@ -106,53 +67,12 @@ public class wrya222 extends Agent
             {
                 value = Math.min(value, minMax(depth - 1, next, alpha, beta));
                 beta = Math.min(beta, value);
-                if (beta <= alpha)
+                if (alpha >= beta)
                     break;
             }
             return value;
         }
 
-    }
-
-    private static epic oldminmax(int depth, State state, int alpha, int beta)
-    {
-        if (state.check && state.player == Player.WHITE)
-            return new epic(10000, state);
-
-        if (state.check && state.player == Player.BLACK)
-            return new epic(-10000, state);
-
-        if (state.over || state.movesUntilDraw == 0)
-            return new epic(0, state);
-
-        if (depth == 0)
-            return new epic(getBoardValue(state.board), state);
-
-        if (state.player == Player.WHITE)
-        {
-            epic value = new epic(Integer.MIN_VALUE, null);
-
-            for (State next : state.next())
-            {
-                value = epic.max(value, oldminmax(depth - 1, next, alpha, beta));
-                //alpha = Math.max(alpha, value.value);
-                //if (alpha >= beta)
-                //    break;
-            }
-            return value;
-        }
-        else
-        {
-            epic value = new epic(Integer.MAX_VALUE, null);
-            for (State next : state.next())
-            {
-                value = epic.min(value, oldminmax(depth - 1, next, alpha, beta));
-                //beta = Math.min(beta, value.value);
-                //if (beta <= alpha)
-                //    break;
-            }
-            return value;
-        }
     }
 
     private static int getStateValue(State state)

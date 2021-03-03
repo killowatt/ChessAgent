@@ -42,20 +42,59 @@ public class wrya222 extends Agent
     @Override
     protected State chooseMove(State current) 
     {
+        ourplayer = current.player;
+
         State bestState = null;
         int bestValue = Integer.MIN_VALUE;
 
+        final int depth = 2;
         for (State state : current.next())
         {
-            int value = current.player == Player.WHITE ? getBoardValue(state.board) : -getBoardValue(state.board);
-            if (value > bestValue)
+            int value = newminmax(depth - 1, state);
+            if (value >= bestValue)
             {
-                bestValue = value;
                 bestState = state;
+                bestValue = value;
             }
         }
 
         return bestState;
+    }
+
+    static Player ourplayer;
+    private static int newminmax(int depth, State state)
+    {
+        if (state.check && state.player != ourplayer)
+            return 10000;
+
+        if (state.check && state.player == ourplayer)
+            return -10000;
+
+        if (state.over || state.movesUntilDraw == 0)
+            return 0;
+
+        if (depth == 0)
+            return ourplayer == Player.WHITE ? getBoardValue(state.board) : -getBoardValue(state.board);
+
+        if (state.player == Player.WHITE)
+        {
+            int value = Integer.MIN_VALUE;
+            for (State next : state.next())
+            {
+                value = Math.max(value, newminmax(depth - 1, next));
+            }
+            return value;
+        }
+        else
+        {
+            int value = Integer.MAX_VALUE;
+            for (State next : state.next())
+            {
+                value = Math.min(value, newminmax(depth - 1, next));
+            }
+            return value;
+        }
+
     }
 
     private static epic minmax(int depth, State state, int alpha, int beta)

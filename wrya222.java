@@ -50,7 +50,7 @@ public class wrya222 extends Agent
         final int depth = 2;
         for (State state : current.next())
         {
-            int value = minMax(depth - 1, state);
+            int value = minMax(depth - 1, state, Integer.MIN_VALUE, Integer.MAX_VALUE);
             if (value > bestValue)
             {
                 bestState = state;
@@ -62,20 +62,26 @@ public class wrya222 extends Agent
     }
 
     static Player ourplayer;
-    private static int minMax(int depth, State state)
+    private static int minMax(int depth, State state, int alpha, int beta)
     {
+        if (state.check && !state.next().iterator().hasNext())
+            return state.player != ourplayer ? 10000000 : -10000000;
+
         if (state.check)
             return state.player != ourplayer ? 10000 : -10000;
 
         if (depth == 0)
-            return ourplayer == Player.WHITE ? getBoardValue(state.board) : -getBoardValue(state.board);
+            return getStateValue(state);
 
         if (state.player == ourplayer)
         {
             int value = Integer.MIN_VALUE;
             for (State next : state.next())
             {
-                value = Math.max(value, minMax(depth - 1, next));
+                value = Math.max(value, minMax(depth - 1, next, alpha, beta));
+                alpha = Math.max(alpha, value);
+                if (beta <= alpha)
+                    break;
             }
             return value;
         }
@@ -84,7 +90,10 @@ public class wrya222 extends Agent
             int value = Integer.MAX_VALUE;
             for (State next : state.next())
             {
-                value = Math.min(value, minMax(depth - 1, next));
+                value = Math.min(value, minMax(depth - 1, next, alpha, beta));
+                beta = Math.min(beta, value);
+                if (beta <= alpha)
+                    break;
             }
             return value;
         }
@@ -130,6 +139,17 @@ public class wrya222 extends Agent
             }
             return value;
         }
+    }
+
+    private static int getStateValue(State state)
+    {
+        int score = 0;
+        for (Piece piece : state.board)
+        {
+            int value = getPieceValue(piece);
+            score += piece.player == ourplayer ? value : -value;
+        }
+        return score;
     }
 
     private static int getBoardValue(Board board)

@@ -86,18 +86,13 @@ public class wrya222 extends Agent
         return score;
     }
 
-    private static int getBoardValue(Board board)
+    private static int getPieceValue(Piece piece)
     {
-        int score = 0;
-        for (Piece piece : board)
-        {
-            int value = getPieceValue(piece);
-            score += piece.player == Player.WHITE ? value : -value;
-        }
-        return score;
+        return gpv2(piece);
     }
 
-    private static int getPieceValue(Piece piece)
+    // no placement bias
+    private static int gpv1(Piece piece)
     {
         if (piece instanceof Pawn)
             return 1;
@@ -111,6 +106,25 @@ public class wrya222 extends Agent
             return 9;
         else if (piece instanceof King)
             return 90;
+        else
+            return 0; // Unknown piece
+    }
+
+    // using placement bias tables
+    private static int gpv2(Piece piece)
+    {
+        if (piece instanceof Pawn)
+            return 100 + (piece.player == Player.BLACK ? PieceSquareTables.pawnTableWhite[piece.rank][piece.file] : PieceSquareTables.pawnTableBlack[piece.rank][piece.file]);
+        else if (piece instanceof Knight)
+            return 320 + (piece.player == Player.BLACK ? PieceSquareTables.knightTableWhite[piece.rank][piece.file] : PieceSquareTables.knightTableBlack[piece.rank][piece.file]);
+        else if (piece instanceof Bishop)
+            return 330 + (piece.player == Player.BLACK ? PieceSquareTables.bishopTableWhite[piece.rank][piece.file] : PieceSquareTables.bishopTableBlack[piece.rank][piece.file]);
+        else if (piece instanceof Rook)
+            return 500 + (piece.player == Player.BLACK ? PieceSquareTables.rookTableWhite[piece.rank][piece.file] : PieceSquareTables.rookTableBlack[piece.rank][piece.file]);
+        else if (piece instanceof Queen)
+            return 900 + (piece.player == Player.BLACK ? PieceSquareTables.queenTableWhite[piece.rank][piece.file] : PieceSquareTables.queenTableBlack[piece.rank][piece.file]);
+        else if (piece instanceof King)
+            return 20000 + (piece.player == Player.BLACK ? PieceSquareTables.kingTableWhite[piece.rank][piece.file] : PieceSquareTables.kingTableBlack[piece.rank][piece.file]);
         else
             return 0; // Unknown piece
     }

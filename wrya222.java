@@ -50,8 +50,8 @@ public class wrya222 extends Agent
         final int depth = 2;
         for (State state : current.next())
         {
-            int value = newminmax(depth - 1, state);
-            if (value >= bestValue)
+            int value = minMax(depth - 1, state);
+            if (value > bestValue)
             {
                 bestState = state;
                 bestValue = value;
@@ -62,26 +62,20 @@ public class wrya222 extends Agent
     }
 
     static Player ourplayer;
-    private static int newminmax(int depth, State state)
+    private static int minMax(int depth, State state)
     {
-        if (state.check && state.player != ourplayer)
-            return 10000;
-
-        if (state.check && state.player == ourplayer)
-            return -10000;
-
-        if (state.over || state.movesUntilDraw == 0)
-            return 0;
+        if (state.check)
+            return state.player != ourplayer ? 10000 : -10000;
 
         if (depth == 0)
             return ourplayer == Player.WHITE ? getBoardValue(state.board) : -getBoardValue(state.board);
 
-        if (state.player == Player.WHITE)
+        if (state.player == ourplayer)
         {
             int value = Integer.MIN_VALUE;
             for (State next : state.next())
             {
-                value = Math.max(value, newminmax(depth - 1, next));
+                value = Math.max(value, minMax(depth - 1, next));
             }
             return value;
         }
@@ -90,14 +84,14 @@ public class wrya222 extends Agent
             int value = Integer.MAX_VALUE;
             for (State next : state.next())
             {
-                value = Math.min(value, newminmax(depth - 1, next));
+                value = Math.min(value, minMax(depth - 1, next));
             }
             return value;
         }
 
     }
 
-    private static epic minmax(int depth, State state, int alpha, int beta)
+    private static epic oldminmax(int depth, State state, int alpha, int beta)
     {
         if (state.check && state.player == Player.WHITE)
             return new epic(10000, state);
@@ -117,7 +111,7 @@ public class wrya222 extends Agent
 
             for (State next : state.next())
             {
-                value = epic.max(value, minmax(depth - 1, next, alpha, beta));
+                value = epic.max(value, oldminmax(depth - 1, next, alpha, beta));
                 //alpha = Math.max(alpha, value.value);
                 //if (alpha >= beta)
                 //    break;
@@ -129,7 +123,7 @@ public class wrya222 extends Agent
             epic value = new epic(Integer.MAX_VALUE, null);
             for (State next : state.next())
             {
-                value = epic.min(value, minmax(depth - 1, next, alpha, beta));
+                value = epic.min(value, oldminmax(depth - 1, next, alpha, beta));
                 //beta = Math.min(beta, value.value);
                 //if (beta <= alpha)
                 //    break;

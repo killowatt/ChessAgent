@@ -1,23 +1,52 @@
+import edu.uky.ai.SearchBudgetExceededException;
 import edu.uky.ai.chess.Agent;
 import edu.uky.ai.chess.state.*;
 
 /**
  * @author William Yates
  */
-public class wrya222 extends Agent 
+public class wrya222 extends Agent
 {
-    public wrya222() 
+    public wrya222()
     {
         super("wrya222");
     }
 
     @Override
-    protected State chooseMove(State current) 
+    protected State chooseMove(State current)
     {
         ourplayer = current.player;
 
         State bestState = current.next().iterator().next();
         int bestValue = Integer.MIN_VALUE;
+
+//        // TODO: transposition table
+//        int bestdepth = 0;
+//        try
+//        {
+//            for (int depth = 1; depth <= 10; depth++)
+//            {
+//                State bState = current.next().iterator().next();
+//                int bValue = Integer.MIN_VALUE;
+//
+//                for (State state : current.next()) {
+//                    int value = minMax(depth - 1, state, Integer.MIN_VALUE, Integer.MAX_VALUE);
+//                    if (value > bestValue) {
+//                        bState = state;
+//                        bValue = value;
+//                    }
+//                }
+//
+//                System.out.println(depth + " was reached");
+//                bestValue = bValue;
+//                bestState = bState;
+//                bestdepth = depth;
+//            }
+//        }
+//        catch (SearchBudgetExceededException e)
+//        {
+//            System.out.println("caught @ " + bestdepth);
+//        }
 
         final int depth = 2;
         for (State state : current.next())
@@ -25,8 +54,8 @@ public class wrya222 extends Agent
             int value = minMax(depth - 1, state, Integer.MIN_VALUE, Integer.MAX_VALUE);
             if (value > bestValue)
             {
-                bestState = state;
-                bestValue = value;
+                    bestState = state;
+                    bestValue = value;
             }
         }
 
@@ -36,15 +65,6 @@ public class wrya222 extends Agent
     static Player ourplayer;
     private static int minMax(int depth, State state, int alpha, int beta)
     {
-        //if (state.check && !state.next().iterator().hasNext())
-        //    return state.player != ourplayer ? 10000 : -100000;
-
-        //if (state.check)
-        //    return state.player != ourplayer ? 1000 : -10000;
-
-        if (state.movesUntilDraw == 0 || (state.over && !state.check))
-            return 0;
-
         if (depth == 0)
             return getStateValue(state);
 
@@ -77,6 +97,12 @@ public class wrya222 extends Agent
 
     private static int getStateValue(State state)
     {
+        if (state.movesUntilDraw == 0 || (state.over && !state.check))
+            return 0;
+
+        if (state.check)
+            return state.player != ourplayer ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+
         int score = 0;
         for (Piece piece : state.board)
         {
@@ -113,18 +139,24 @@ public class wrya222 extends Agent
     // using placement bias tables
     private static int gpv2(Piece piece)
     {
+        int x = piece.file;
+        int y = piece.rank;
+
+        boolean isWhite = piece.player == Player.WHITE;
+        isWhite = !isWhite; // ?!?
+
         if (piece instanceof Pawn)
-            return 100 + (piece.player == Player.BLACK ? PieceSquareTables.pawnTableWhite[piece.rank][piece.file] : PieceSquareTables.pawnTableBlack[piece.rank][piece.file]);
+            return 100 + (isWhite ? PieceSquareTables.pawnTableWhite[y][x] : PieceSquareTables.pawnTableBlack[y][x]);
         else if (piece instanceof Knight)
-            return 320 + (piece.player == Player.BLACK ? PieceSquareTables.knightTableWhite[piece.rank][piece.file] : PieceSquareTables.knightTableBlack[piece.rank][piece.file]);
+            return 320 + (isWhite ? PieceSquareTables.knightTableWhite[y][x] : PieceSquareTables.knightTableBlack[y][x]);
         else if (piece instanceof Bishop)
-            return 330 + (piece.player == Player.BLACK ? PieceSquareTables.bishopTableWhite[piece.rank][piece.file] : PieceSquareTables.bishopTableBlack[piece.rank][piece.file]);
+            return 330 + (isWhite ? PieceSquareTables.bishopTableWhite[y][x] : PieceSquareTables.bishopTableBlack[y][x]);
         else if (piece instanceof Rook)
-            return 500 + (piece.player == Player.BLACK ? PieceSquareTables.rookTableWhite[piece.rank][piece.file] : PieceSquareTables.rookTableBlack[piece.rank][piece.file]);
+            return 500 + (isWhite ? PieceSquareTables.rookTableWhite[y][x] : PieceSquareTables.rookTableBlack[y][x]);
         else if (piece instanceof Queen)
-            return 900 + (piece.player == Player.BLACK ? PieceSquareTables.queenTableWhite[piece.rank][piece.file] : PieceSquareTables.queenTableBlack[piece.rank][piece.file]);
+            return 900 + (isWhite ? PieceSquareTables.queenTableWhite[y][x] : PieceSquareTables.queenTableBlack[y][x]);
         else if (piece instanceof King)
-            return 20000 + (piece.player == Player.BLACK ? PieceSquareTables.kingTableWhite[piece.rank][piece.file] : PieceSquareTables.kingTableBlack[piece.rank][piece.file]);
+            return 20000 + (isWhite ? PieceSquareTables.kingTableWhite[y][x] : PieceSquareTables.kingTableBlack[y][x]);
         else
             return 0; // Unknown piece
     }

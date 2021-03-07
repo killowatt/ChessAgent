@@ -52,10 +52,11 @@ public class wrya222 extends Agent
         for (State state : current.next())
         {
             int value = minMax(depth - 1, state, Integer.MIN_VALUE, Integer.MAX_VALUE);
+
             if (value > bestValue)
             {
-                    bestState = state;
-                    bestValue = value;
+                bestState = state;
+                bestValue = value;
             }
         }
 
@@ -143,7 +144,7 @@ public class wrya222 extends Agent
         int y = piece.rank;
 
         boolean isWhite = piece.player == Player.WHITE;
-        isWhite = !isWhite; // ?!?
+        //isWhite = !isWhite; // ?!?
 
         if (piece instanceof Pawn)
             return 100 + (isWhite ? PieceSquareTables.pawnTableWhite[y][x] : PieceSquareTables.pawnTableBlack[y][x]);
